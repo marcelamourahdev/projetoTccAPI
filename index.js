@@ -1,4 +1,4 @@
-//Importa os módulos
+
 require('dotenv').config();
 const express = require('express');
 const { Client } = require('pg');
@@ -7,14 +7,32 @@ const swaggerUi = require('swagger-ui-express');
 
 
 const app = express();
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
+const NODE_ENV = process.env.NODE_ENV || 'development';
 
-//Middleware para JSON e CORS
+
+const getBaseUrl = () => {
+    if (process.env.BASE_URL) {
+        return process.env.BASE_URL;
+    }
+    
+    
+    if (NODE_ENV === 'production' || process.env.RENDER) {
+        return 'https://projetotccapi.onrender.com';
+    }
+    
+    return `http://localhost:${PORT}`;
+};
+
+const BASE_URL = getBaseUrl();
+
+
 app.use(express.json());
 
-// CORS headers
+
+const CORS_ORIGINS = process.env.CORS_ORIGINS || '*';
 app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Origin', CORS_ORIGINS);
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, x-api-key');
     
@@ -25,16 +43,19 @@ app.use((req, res, next) => {
     }
 });
 
-//Rate Limiting
+
 const rateLimit = require('express-rate-limit');
 
+const RATE_LIMIT_MAX = parseInt(process.env.RATE_LIMIT_MAX) || 100;
+const RATE_LIMIT_WINDOW = parseInt(process.env.RATE_LIMIT_WINDOW_MINUTES) || 15;
+
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutos
-    max: 100, // máximo 100 requests por IP por janela de tempo
+    windowMs: RATE_LIMIT_WINDOW * 60 * 1000,
+    max: RATE_LIMIT_MAX,
     message: {
         error: 'Muitas requisições',
-        message: 'Limite de requisições excedido. Tente novamente em 15 minutos.',
-        retryAfter: '15 minutes'
+        message: `Limite de ${RATE_LIMIT_MAX} requisições excedido. Tente novamente em ${RATE_LIMIT_WINDOW} minutos.`,
+        retryAfter: `${RATE_LIMIT_WINDOW} minutes`
     },
     standardHeaders: true,
     legacyHeaders: false
@@ -42,14 +63,18 @@ const limiter = rateLimit({
 
 app.use('/api/', limiter);
 
-//Configuração - Swagger
+
+const SWAGGER_TITLE = process.env.SWAGGER_TITLE || 'API de Pesquisas e Cadastro de Clientes';
+const API_VERSION = process.env.API_VERSION || '1.0.0';
+const SWAGGER_DESCRIPTION = process.env.SWAGGER_DESCRIPTION || 'API REST para gerenciamento de pesquisas acadêmicas e cadastro de clientes';
+
 const swaggerOptions = {
     definition: {
         openapi: '3.0.0',
         info: {
-            title: 'API de Pesquisas e Cadastro de Clientes',
-            version: '1.0.0',
-            description: 'API REST para gerenciamento de pesquisas acadêmicas e cadastro de clientes',
+            title: SWAGGER_TITLE,
+            version: API_VERSION,
+            description: SWAGGER_DESCRIPTION,
             contact: {
                 name: 'Marcela - Projeto TCC',
                 email: 'marcela@exemplo.com'
@@ -57,8 +82,8 @@ const swaggerOptions = {
         },
         servers: [
             {
-                url: 'http://localhost:3000',
-                description: 'Servidor de desenvolvimento'
+                url: BASE_URL,
+                description: NODE_ENV === 'production' ? 'Servidor de produção (Render)' : 'Servidor de desenvolvimento'
             }
         ],
         components: {
@@ -160,12 +185,12 @@ const swaggerOptions = {
             }
         ]
     },
-    apis: ['./index.js'] // Arquivo - Comentários da Documentação
+    apis: ['./index.js'] 
 };
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
-// Rota para servir a documentação Swagger
+
 app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
     customSiteTitle: 'API Documentation - TCC Marcela',
     customfavIcon: '/favicon.ico',
@@ -175,10 +200,10 @@ app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
     }
 }));
 
-//API Key para autenticação
-const API_KEY = process.env.API_KEY || '17e393bbdd78b1cb14d30c0a6cf3669b18b5cb385eafe0d170157d41253718ba';
 
-//Middleware de autenticação
+const API_KEY = process.env.API_KEY;
+
+
 const authenticateApiKey = (req, res, next) => {
     const apiKey = req.headers['x-api-key'] || req.headers['authorization'];
     
@@ -199,7 +224,7 @@ const authenticateApiKey = (req, res, next) => {
     next();
 };
 
-//Configuração do banco de dados
+
 const clientPesquisas = new Client({
     connectionString: process.env.DB_PESQUISAS_URL || 'postgresql://bd_projeto_tcc_user:00a99UTdlLeMcvlBmSEzQwuaCEfN2L7j@dpg-d2946opr0fns73f1mlo0-a.oregon-postgres.render.com/bd_projeto_tcc',
     ssl: { rejectUnauthorized: false }
@@ -210,7 +235,7 @@ const clientClientes = new Client({
     ssl: { rejectUnauthorized: false }
 });
 
-// 7. Conecta aos bancos de dados
+
 Promise.all([
     clientPesquisas.connect(),
     clientClientes.connect()
@@ -257,7 +282,7 @@ Promise.all([
  *                 links:
  *                   type: object
  */
-// 1 - Teste da API
+// Retorna informações gerais sobre a API
 app.get('/', (req, res) => {
     res.json({ 
         message: 'API de Pesquisas e Cadastro de Clientes funcionando!',
@@ -273,8 +298,8 @@ app.get('/', (req, res) => {
             deletar: 'DELETE /api/v1/clientes/:cpf (requer API Key)'
         },
         links: {
-            self: 'http://localhost:3000/',
-            docs: 'http://localhost:3000/api/v1/docs'
+            self: `${BASE_URL}/`,
+            docs: `${BASE_URL}/api/v1/docs`
         }
     });
 });
@@ -308,7 +333,7 @@ app.get('/', (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-// 2 - Teste da API - GET /api/v1/test (PROTEGIDO)
+// Teste da API
 app.get('/api/v1/test', authenticateApiKey, (req, res) => {
     res.json({
         success: true,
@@ -319,8 +344,8 @@ app.get('/api/v1/test', authenticateApiKey, (req, res) => {
             version: '1.0.0'
         },
         links: {
-            self: 'http://localhost:3000/api/v1/test',
-            api_root: 'http://localhost:3000/'
+            self: `${BASE_URL}/api/v1/test`,
+            api_root: `${BASE_URL}/`
         }
     });
 });
@@ -410,7 +435,7 @@ app.get('/api/v1/test', authenticateApiKey, (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-// 3 - PESQUISAS - GET /api/v1/pesquisas (PROTEGIDO)
+// PESQUISAS
 app.get('/api/v1/pesquisas', authenticateApiKey, async (req, res) => {
     try {
         // Filtering e Sorting
@@ -439,9 +464,9 @@ app.get('/api/v1/pesquisas', authenticateApiKey, async (req, res) => {
                 order: sortOrder
             },
             links: {
-                self: `http://localhost:3000/api/v1/pesquisas?sort=${sortField}&order=${order}&limit=${limit}&offset=${offset}`,
-                first: `http://localhost:3000/api/v1/pesquisas?sort=${sortField}&order=${order}&limit=${limit}&offset=0`,
-                next: offset + parseInt(limit) < total ? `http://localhost:3000/api/v1/pesquisas?sort=${sortField}&order=${order}&limit=${limit}&offset=${offset + parseInt(limit)}` : null
+                self: `${BASE_URL}/api/v1/pesquisas?sort=${sortField}&order=${order}&limit=${limit}&offset=${offset}`,
+                first: `${BASE_URL}/api/v1/pesquisas?sort=${sortField}&order=${order}&limit=${limit}&offset=0`,
+                next: offset + parseInt(limit) < total ? `${BASE_URL}/api/v1/pesquisas?sort=${sortField}&order=${order}&limit=${limit}&offset=${offset + parseInt(limit)}` : null
             }
         });
     } catch (err) {
@@ -508,7 +533,7 @@ app.get('/api/v1/pesquisas', authenticateApiKey, async (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-// 4 - CONSULTAR CLIENTE - GET /api/v1/clientes/:cpf (PROTEGIDO)
+// CONSULTAR CLIENTE
 app.get('/api/v1/clientes/:cpf', authenticateApiKey, async (req, res) => {
     try {
         const { cpf } = req.params;
@@ -531,10 +556,10 @@ app.get('/api/v1/clientes/:cpf', authenticateApiKey, async (req, res) => {
             message: 'Cliente encontrado',
             data: result.rows[0],
             links: {
-                self: `http://localhost:3000/api/v1/clientes/${cpf}`,
-                update: `http://localhost:3000/api/v1/clientes/${cpf}`,
-                delete: `http://localhost:3000/api/v1/clientes/${cpf}`,
-                collection: 'http://localhost:3000/api/v1/clientes'
+                self: `${BASE_URL}/api/v1/clientes/${cpf}`,
+                update: `${BASE_URL}/api/v1/clientes/${cpf}`,
+                delete: `${BASE_URL}/api/v1/clientes/${cpf}`,
+                collection: `${BASE_URL}/api/v1/clientes`
             }
         });
         
@@ -611,12 +636,12 @@ app.get('/api/v1/clientes/:cpf', authenticateApiKey, async (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-// 5 - CADASTRAR CLIENTE - POST /api/v1/clientes (PROTEGIDO)
+//CADASTRAR CLIENTE
 app.post('/api/v1/clientes', authenticateApiKey, async (req, res) => {
     try {
         const { nome, cpf, telefone, estado } = req.body;
         
-        // Validação básica
+        
         if (!nome || !cpf) {
             return res.status(400).json({
                 success: false,
@@ -625,7 +650,7 @@ app.post('/api/v1/clientes', authenticateApiKey, async (req, res) => {
             });
         }
         
-        // Verifica se o CPF já existe
+        
         const existingClient = await clientClientes.query(
             'SELECT cpf FROM cadastro_clientes WHERE cpf = $1',
             [cpf]
@@ -639,7 +664,7 @@ app.post('/api/v1/clientes', authenticateApiKey, async (req, res) => {
             });
         }
         
-        // Insere o novo cliente
+        
         const result = await clientClientes.query(
             'INSERT INTO cadastro_clientes (nome, cpf, telefone, estado) VALUES ($1, $2, $3, $4) RETURNING nome, cpf, telefone, estado',
             [nome, cpf, telefone, estado]
@@ -650,8 +675,8 @@ app.post('/api/v1/clientes', authenticateApiKey, async (req, res) => {
             message: 'Cliente cadastrado com sucesso',
             data: result.rows[0],
             links: {
-                self: `http://localhost:3000/api/v1/clientes/${result.rows[0].cpf}`,
-                collection: 'http://localhost:3000/api/v1/clientes'
+                self: `${BASE_URL}/api/v1/clientes/${result.rows[0].cpf}`,
+                collection: `${BASE_URL}/api/v1/clientes`
             }
         });
         
@@ -734,13 +759,13 @@ app.post('/api/v1/clientes', authenticateApiKey, async (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-// 6 - ATUALIZAR CLIENTE - PUT /api/v1/clientes/:cpf (PROTEGIDO)
+// ATUALIZAR CLIENTE
 app.put('/api/v1/clientes/:cpf', authenticateApiKey, async (req, res) => {
     try {
         const { cpf } = req.params;
         const { nome, telefone, estado } = req.body;
         
-        // Verifica se o cliente existe
+        
         const existingClient = await clientClientes.query(
             'SELECT cpf FROM cadastro_clientes WHERE cpf = $1',
             [cpf]
@@ -754,7 +779,7 @@ app.put('/api/v1/clientes/:cpf', authenticateApiKey, async (req, res) => {
             });
         }
         
-        // Monta a query de atualização dinamicamente
+        
         const updates = [];
         const values = [];
         let paramIndex = 1;
@@ -783,7 +808,7 @@ app.put('/api/v1/clientes/:cpf', authenticateApiKey, async (req, res) => {
             });
         }
         
-        values.push(cpf); // CPF vai por último para o WHERE
+        values.push(cpf); 
         
         const result = await clientClientes.query(
             `UPDATE cadastro_clientes SET ${updates.join(', ')} WHERE cpf = $${paramIndex} RETURNING nome, cpf, telefone, estado`,
@@ -795,8 +820,8 @@ app.put('/api/v1/clientes/:cpf', authenticateApiKey, async (req, res) => {
             message: 'Cliente atualizado com sucesso',
             data: result.rows[0],
             links: {
-                self: `http://localhost:3000/api/v1/clientes/${cpf}`,
-                collection: 'http://localhost:3000/api/v1/clientes'
+                self: `${BASE_URL}/api/v1/clientes/${cpf}`,
+                collection: `${BASE_URL}/api/v1/clientes`
             }
         });
         
@@ -864,7 +889,7 @@ app.put('/api/v1/clientes/:cpf', authenticateApiKey, async (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-// 7 - DELETAR CLIENTE - DELETE /api/v1/clientes/:cpf (PROTEGIDO)
+// DELETAR CLIENTE
 app.delete('/api/v1/clientes/:cpf', authenticateApiKey, async (req, res) => {
     try {
         const { cpf } = req.params;
@@ -894,8 +919,8 @@ app.delete('/api/v1/clientes/:cpf', authenticateApiKey, async (req, res) => {
             message: 'Cliente deletado com sucesso',
             data: existingClient.rows[0],
             links: {
-                collection: 'http://localhost:3000/api/v1/clientes',
-                create: 'http://localhost:3000/api/v1/clientes'
+                collection: `${BASE_URL}/api/v1/clientes`,
+                create: `${BASE_URL}/api/v1/clientes`
             }
         });
         
@@ -909,8 +934,10 @@ app.delete('/api/v1/clientes/:cpf', authenticateApiKey, async (req, res) => {
     }
 });
 
-// 8 - Inicia o servidor
-app.listen(port, () => {
-    console.log(`🚀 API rodando em http://localhost:${port}`);
-    console.log(`📝 Versão: 1.0.0 - Simplificada`);
+// 8. Inicia o servidor
+app.listen(PORT, () => {
+    console.log(`🚀 API rodando em ${BASE_URL}`);
+    console.log(`📝 Versão: ${API_VERSION} - Ambiente: ${NODE_ENV}`);
+    console.log(`📚 Documentação: ${BASE_URL}/api/v1/docs`);
+    console.log(`🔒 Rate Limit: ${RATE_LIMIT_MAX} requests/${RATE_LIMIT_WINDOW} min`);
 });

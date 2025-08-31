@@ -84,19 +84,85 @@ cp env.example .env
 ```
 
 3. **Configure o arquivo `.env`:**
-```env
-# Autenticação
-API_KEY=17e393bbdd78b1cb14d30c0a6cf3669b18b5cb385eafe0d170157d41253718ba
 
-# Bancos de dados
+#### **🔧 Configuração Completa (.env)**
+```env
+# =================================================================
+# CONFIGURAÇÃO DA API - VARIÁVEIS DE AMBIENTE
+# =================================================================
+
+# API Key para autenticação (OBRIGATÓRIO)
+API_KEY=env.API_KEY
+
+# =================================================================
+# CONFIGURAÇÃO DO SERVIDOR
+# =================================================================
+
+# Porta do servidor
+PORT=3000
+
+# Ambiente (development, production)
+NODE_ENV=development
+
+# URL base da API (opcional - auto-detectada)
+# LOCAL: http://localhost:3000
+# RENDER: https://projetotccapi.onrender.com
+BASE_URL=
+
+# =================================================================
+# CONFIGURAÇÃO DOS BANCOS DE DADOS
+# =================================================================
+
+# Banco de dados de pesquisas (OBRIGATÓRIO)
 DB_PESQUISAS_URL=postgresql://bd_projeto_tcc_user:senha@host/bd_projeto_tcc
+
+# Banco de dados de clientes (OBRIGATÓRIO) 
 DB_CLIENTES_URL=postgresql://cadastro_clientes_wa08_user:senha@host/cadastro_clientes_wa08
 
-# Servidor
-PORT=3000
-NODE_ENV=development
-LOG_LEVEL=info
+# =================================================================
+# CONFIGURAÇÃO DE SEGURANÇA E PERFORMANCE
+# =================================================================
+
+# Rate Limiting - Número máximo de requests por IP
+RATE_LIMIT_MAX=100
+
+# Rate Limiting - Janela de tempo em minutos
+RATE_LIMIT_WINDOW_MINUTES=15
+
+# Origins permitidas (separadas por vírgula, ou * para todos)
+CORS_ORIGINS=*
+
+# =================================================================
+# CONFIGURAÇÃO DO SWAGGER
+# =================================================================
+
+# Título da documentação
+SWAGGER_TITLE=API de Pesquisas e Cadastro de Clientes
+
+# Versão da API
+API_VERSION=1.0.0
+
+# Descrição da API
+SWAGGER_DESCRIPTION=API REST para gerenciamento de pesquisas acadêmicas e cadastro de clientes
 ```
+
+### **🌍 Configuração por Ambiente**
+
+#### **Local Development:**
+```env
+NODE_ENV=development
+PORT=3000
+BASE_URL=http://localhost:3000
+```
+
+#### **Production (Render):**
+```env
+NODE_ENV=production
+PORT=10000
+BASE_URL=https://projetotccapi.onrender.com
+```
+
+⚠️ **Auto-detecção:** Se `BASE_URL` não for definida, será detectada automaticamente baseada no ambiente.
 
 4. **Execute a aplicação:**
 ```bash
@@ -113,11 +179,39 @@ npm test
 npm run test:coverage
 ```
 
+### **🔗 URLs da API**
+
+- **Local:** http://localhost:3000
+- **Produção:** https://projetotccapi.onrender.com
+- **Documentação:** `/api/v1/docs`
+
+### **🚀 Deploy no Render**
+
+#### **Configuração Automática:**
+1. A API detecta automaticamente o ambiente Render
+2. URLs são ajustadas automaticamente para produção
+3. Variáveis de ambiente são carregadas do painel Render
+
+#### **Variáveis no Render Dashboard:**
+```env
+NODE_ENV=production
+API_KEY=env.API_KEY
+DB_PESQUISAS_URL=postgresql://...
+DB_CLIENTES_URL=postgresql://...
+RATE_LIMIT_MAX=100
+RATE_LIMIT_WINDOW_MINUTES=15
+```
+
+#### **Detecção de Ambiente:**
+- ✅ **Render:** Detectado via `process.env.RENDER`
+- ✅ **Produção:** URLs ajustadas para `https://projetotccapi.onrender.com`
+- ✅ **Local:** URLs mantidas como `http://localhost:3000`
+
 ## 🔐 Autenticação
 
 **Tipo:** API Key Authentication
 **Header:** `x-api-key` ou `authorization`
-**Valor:** `17e393bbdd78b1cb14d30c0a6cf3669b18b5cb385eafe0d170157d41253718ba`
+**Valor:** `env.API_KEY`
 
 **⚠️ Todos os endpoints protegidos requerem autenticação**
 
@@ -195,7 +289,7 @@ npm run test:coverage
 
 ### 1. Consultar Cliente
 ```bash
-curl -H "x-api-key: 17e393bbdd78b1cb14d30c0a6cf3669b18b5cb385eafe0d170157d41253718ba" \
+curl -H "x-api-key: env.API_KEY" \
      http://localhost:3000/api/v1/clientes/12345678901
 ```
 
@@ -203,14 +297,14 @@ curl -H "x-api-key: 17e393bbdd78b1cb14d30c0a6cf3669b18b5cb385eafe0d170157d412537
 ```bash
 curl -X POST \
      -H "Content-Type: application/json" \
-     -H "x-api-key: 17e393bbdd78b1cb14d30c0a6cf3669b18b5cb385eafe0d170157d41253718ba" \
+     -H "x-api-key: env.API_KEY" \
      -d '{"nome":"João Silva","cpf":"12345678901","telefone":"11999999999","estado":"SP"}' \
      http://localhost:3000/api/v1/clientes
 ```
 
 ### 3. Listar Pesquisas com Paginação
 ```bash
-curl -H "x-api-key: 17e393bbdd78b1cb14d30c0a6cf3669b18b5cb385eafe0d170157d41253718ba" \
+curl -H "x-api-key: env.API_KEY" \
      "http://localhost:3000/api/v1/pesquisas?limit=10&offset=0&sort=id&order=asc"
 ```
 
@@ -300,4 +394,37 @@ X-RateLimit-Remaining: 99
 }
 ```
 
+## 🔧 **Melhorias de Configuração Implementadas**
+
+### **✅ Variáveis de Ambiente Robustas:**
+- **Auto-detecção** de ambiente (development/production)
+- **URLs dinâmicas** baseadas no ambiente
+- **Rate limiting configurável**
+- **CORS configurável**
+- **Configuração Swagger parametrizada**
+
+### **✅ Compatibilidade Multi-Ambiente:**
+- **Local:** `http://localhost:3000`
+- **Render:** `https://projetotccapi.onrender.com`
+- **Auto-switch** baseado em `NODE_ENV` e `process.env.RENDER`
+
+### **✅ Configuração Segura:**
+- Todas as credenciais em variáveis de ambiente
+- Fallbacks seguros para valores padrão
+- Documentação completa de configuração
+- Exemplo `.env` atualizado e organizado
+
+### **✅ Logs Melhorados:**
+```bash
+🚀 API rodando em https://projetotccapi.onrender.com
+📝 Versão: 1.0.0 - Ambiente: production
+📚 Documentação: https://projetotccapi.onrender.com/api/v1/docs
+🔒 Rate Limit: 100 requests/15 min
+```
+
 ---
+```bash
+🚀 Link documentação API rodando em produção: https://projetotccapi.onrender.com/api/v1/docs/#/Sistema/get_
+🚀 Link documentação API rodando em Localmente: http://localhost:3000/api/v1/docs/#/
+
+```
