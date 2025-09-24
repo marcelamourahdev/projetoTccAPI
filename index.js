@@ -247,6 +247,43 @@ Promise.all([
     console.error('❌ Erro ao conectar aos bancos:', err);
 });
 
+// ===== FUNÇÕES UTILITÁRIAS =====
+
+/**
+ * Converte textos com \n ou \\n literais em quebras de linha reais
+ * @param {string} text - Texto a ser processado
+ * @returns {string} - Texto com quebras de linha reais
+ */
+const processTextLineBreaks = (text) => {
+    if (!text || typeof text !== 'string') return text;
+    
+    // Primeiro converte \\n (barra dupla + n) em quebra de linha real
+    // Depois converte \n (barra simples + n) em quebra de linha real
+    return text
+        .replace(/\\\\n/g, '\n')  // \\n -> quebra de linha real
+        .replace(/\\n/g, '\n');   // \n -> quebra de linha real
+};
+
+/**
+ * Processa todos os campos de texto de um objeto, convertendo quebras de linha
+ * @param {Object} obj - Objeto a ser processado
+ * @returns {Object} - Objeto com textos processados
+ */
+const processObjectLineBreaks = (obj) => {
+    if (!obj || typeof obj !== 'object') return obj;
+    
+    const processed = { ...obj };
+    
+    // Processa cada propriedade do objeto
+    for (const key in processed) {
+        if (typeof processed[key] === 'string') {
+            processed[key] = processTextLineBreaks(processed[key]);
+        }
+    }
+    
+    return processed;
+};
+
 // ===== ENDPOINTS DA API =====
 
 /**
@@ -452,10 +489,13 @@ app.get('/api/v1/pesquisas', authenticateApiKey, async (req, res) => {
         const countResult = await clientPesquisas.query('SELECT COUNT(*) FROM bd_pesquisa');
         const total = parseInt(countResult.rows[0].count);
         
+        // Processa os textos para converter quebras de linha literais em reais
+        const processedData = result.rows.map(row => processObjectLineBreaks(row));
+        
         res.json({
             success: true,
             message: 'Pesquisas encontradas',
-            data: result.rows,
+            data: processedData,
             meta: {
                 total: total,
                 limit: parseInt(limit),
@@ -551,10 +591,13 @@ app.get('/api/v1/clientes/:cpf', authenticateApiKey, async (req, res) => {
             });
         }
         
+        // Processa os textos para converter quebras de linha literais em reais
+        const processedClient = processObjectLineBreaks(result.rows[0]);
+        
         res.json({
             success: true,
             message: 'Cliente encontrado',
-            data: result.rows[0],
+            data: processedClient,
             links: {
                 self: `${BASE_URL}/api/v1/clientes/${cpf}`,
                 update: `${BASE_URL}/api/v1/clientes/${cpf}`,
@@ -670,10 +713,13 @@ app.post('/api/v1/clientes', authenticateApiKey, async (req, res) => {
             [nome, cpf, telefone, estado]
         );
         
+        // Processa os textos para converter quebras de linha literais em reais
+        const processedNewClient = processObjectLineBreaks(result.rows[0]);
+        
         res.status(201).json({
             success: true,
             message: 'Cliente cadastrado com sucesso',
-            data: result.rows[0],
+            data: processedNewClient,
             links: {
                 self: `${BASE_URL}/api/v1/clientes/${result.rows[0].cpf}`,
                 collection: `${BASE_URL}/api/v1/clientes`
@@ -815,10 +861,13 @@ app.put('/api/v1/clientes/:cpf', authenticateApiKey, async (req, res) => {
             values
         );
         
+        // Processa os textos para converter quebras de linha literais em reais
+        const processedUpdatedClient = processObjectLineBreaks(result.rows[0]);
+        
         res.json({
             success: true,
             message: 'Cliente atualizado com sucesso',
-            data: result.rows[0],
+            data: processedUpdatedClient,
             links: {
                 self: `${BASE_URL}/api/v1/clientes/${cpf}`,
                 collection: `${BASE_URL}/api/v1/clientes`
@@ -914,10 +963,13 @@ app.delete('/api/v1/clientes/:cpf', authenticateApiKey, async (req, res) => {
             [cpf]
         );
         
+        // Processa os textos para converter quebras de linha literais em reais
+        const processedDeletedClient = processObjectLineBreaks(existingClient.rows[0]);
+        
         res.json({
             success: true,
             message: 'Cliente deletado com sucesso',
-            data: existingClient.rows[0],
+            data: processedDeletedClient,
             links: {
                 collection: `${BASE_URL}/api/v1/clientes`,
                 create: `${BASE_URL}/api/v1/clientes`
