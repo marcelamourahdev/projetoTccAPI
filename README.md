@@ -270,23 +270,17 @@ A API processa automaticamente quebras de linha literais em textos:
 // Output da API: "Linha 1\nLinha 2" (quebra real)
 ```
 
-### Campo 'fonte' Virtual
-Para compatibilidade com aplicações existentes, a API gera automaticamente um campo `fonte` combinando:
+### Estrutura de Resposta
+A API retorna dados com 6 campos individuais:
 
-```javascript
-fonte = artigo + '\n' + autor + '\n' + link
-```
-
-**Resposta completa:**
 ```json
 {
   "id": 1,
-  "pergunta": "...",
-  "resposta": "...",
-  "artigo": "Artigo: Título do artigo",
-  "autor": "Autor: Nome do autor",
-  "link": "Link: https://...",
-  "fonte": "Artigo: Título do artigo\nAutor: Nome do autor\nLink: https://..."
+  "pergunta": "O que é uma API REST?",
+  "resposta": "Uma API REST é uma interface...",
+  "artigo": "Artigo: Do RESTful API design rules...",
+  "autor": "Autor: Justus Bogner et al. (2023)",
+  "link": "Link: https://www.periodicos.capes.gov.br/..."
 }
 ```
 
@@ -364,9 +358,6 @@ CREATE TABLE bd_pesquisa (
     autor TEXT,
     link TEXT
 );
-
--- Campo 'fonte' é gerado automaticamente pela API
--- combinando: artigo + '\n' + autor + '\n' + link
 ```
 
 ### Banco 2: Clientes (`cadastro_clientes_wa08`)

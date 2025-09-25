@@ -490,21 +490,7 @@ app.get('/api/v1/pesquisas', authenticateApiKey, async (req, res) => {
         const total = parseInt(countResult.rows[0].count);
         
         // Processa os textos para converter quebras de linha literais em reais
-        // e adiciona campo 'fonte' combinando artigo, autor e link para compatibilidade
-        const processedData = result.rows.map(row => {
-            const processedRow = processObjectLineBreaks(row);
-            
-            // Adiciona campo 'fonte' combinando os campos separados
-            if (processedRow.artigo || processedRow.autor || processedRow.link) {
-                const fonteParts = [];
-                if (processedRow.artigo) fonteParts.push(processedRow.artigo);
-                if (processedRow.autor) fonteParts.push(processedRow.autor);
-                if (processedRow.link) fonteParts.push(processedRow.link);
-                processedRow.fonte = fonteParts.join('\n');
-            }
-            
-            return processedRow;
-        });
+        const processedData = result.rows.map(row => processObjectLineBreaks(row));
         
         res.json({
             success: true,
