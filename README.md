@@ -31,9 +31,11 @@ API REST profissional que demonstra implementação completa de conceitos de Eng
 - ✅ **Múltiplos bancos** PostgreSQL
 - ✅ **Versionamento** de API (/api/v1/)
 - ✅ **Estrutura de responses** padronizada
+- ✅ **Processamento de quebras de linha** automático
 
 ### Funcionalidades Principais
 - **Gerenciamento de Pesquisas:** Consulta de dados acadêmicos com filtering/sorting
+- **Processamento de Texto:** Conversão automática de quebras de linha literais para reais
 - **CRUD Clientes:** Cadastro, consulta, atualização e exclusão
 - **Segurança:** Autenticação, rate limiting, validação de dados
 - **Monitoramento:** Logs estruturados e tratamento de erros
@@ -248,6 +250,46 @@ RATE_LIMIT_WINDOW_MINUTES=15
 | `PUT` | `/api/v1/clientes/:cpf` | Atualizar cliente | ✅ |
 | `DELETE` | `/api/v1/clientes/:cpf` | Deletar cliente | ✅ |
 
+## 🔧 Processamento de Texto
+
+### Quebras de Linha Automáticas
+A API processa automaticamente quebras de linha literais em textos:
+
+**Conversões realizadas:**
+- `\\n` (dupla barra) → quebra de linha real
+- `\n` (barra simples literal) → quebra de linha real
+
+**Campos processados:**
+- Todos os campos de texto retornados pela API
+- Aplicado em pesquisas e clientes
+- Processamento transparente (automático)
+
+**Exemplo:**
+```json
+// Input do banco: "Linha 1\\nLinha 2"
+// Output da API: "Linha 1\nLinha 2" (quebra real)
+```
+
+### Campo 'fonte' Virtual
+Para compatibilidade com aplicações existentes, a API gera automaticamente um campo `fonte` combinando:
+
+```javascript
+fonte = artigo + '\n' + autor + '\n' + link
+```
+
+**Resposta completa:**
+```json
+{
+  "id": 1,
+  "pergunta": "...",
+  "resposta": "...",
+  "artigo": "Artigo: Título do artigo",
+  "autor": "Autor: Nome do autor",
+  "link": "Link: https://...",
+  "fonte": "Artigo: Título do artigo\nAutor: Nome do autor\nLink: https://..."
+}
+```
+
 ## 📚 Documentação
 
 **Swagger UI:** http://localhost:3000/api/v1/docs
@@ -313,7 +355,18 @@ curl -H "x-api-key: env.API_KEY" \
 ### Banco 1: Pesquisas (`bd_projeto_tcc`)
 ```sql
 -- Tabela: bd_pesquisa
--- Campos: id, pergunta, resposta, fonte, data_criacao
+-- Estrutura da tabela (6 colunas):
+CREATE TABLE bd_pesquisa (
+    id SERIAL PRIMARY KEY,
+    pergunta TEXT NOT NULL,
+    resposta TEXT NOT NULL,
+    artigo TEXT,
+    autor TEXT,
+    link TEXT
+);
+
+-- Campo 'fonte' é gerado automaticamente pela API
+-- combinando: artigo + '\n' + autor + '\n' + link
 ```
 
 ### Banco 2: Clientes (`cadastro_clientes_wa08`)
