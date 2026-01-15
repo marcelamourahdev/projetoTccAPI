@@ -3,7 +3,7 @@
 
 API REST completa para gerenciamento de pesquisas acadêmicas e cadastro de clientes para amostra didática, desenvolvida seguindo as melhores práticas de arquitetura REST e padrões de mercado.
 
-## 📋 Índice
+## Índice
 
 - [Visão Geral](#-visão-geral)
 - [Arquitetura](#-arquitetura)
@@ -17,21 +17,21 @@ API REST completa para gerenciamento de pesquisas acadêmicas e cadastro de clie
 - [Segurança](#-segurança)
 - [Tecnologias](#-tecnologias)
 
-## 🎯 Visão Geral
+## Visão Geral
 
 API REST profissional que demonstra implementação completa de conceitos de Engenharia de Software, incluindo:
 
-- ✅ **Arquitetura REST** completa com HATEOAS
-- ✅ **Autenticação** e autorização por API Key
-- ✅ **Rate Limiting** para controle de tráfego
-- ✅ **CORS** para integração cross-origin
-- ✅ **Filtering, Sorting e Paginação**
-- ✅ **Documentação** Swagger/OpenAPI 3.0
-- ✅ **Testes Unitários** automatizados
-- ✅ **Múltiplos bancos** PostgreSQL
-- ✅ **Versionamento** de API (/api/v1/)
-- ✅ **Estrutura de responses** padronizada
-- ✅ **Processamento de quebras de linha** automático
+- **Arquitetura REST** completa com HATEOAS
+- **Autenticação** e autorização por API Key
+- **Rate Limiting** para controle de tráfego
+- **CORS** para integração cross-origin
+- **Filtering, Sorting e Paginação**
+- **Documentação** Swagger/OpenAPI 3.0
+- **Testes Unitários** automatizados
+- **Múltiplos bancos** PostgreSQL
+- **Versionamento** de API (/api/v1/)
+- **Estrutura de responses** padronizada
+- **Processamento de quebras de linha** automático
 
 ### Funcionalidades Principais
 - **Gerenciamento de Pesquisas:** Consulta de dados acadêmicos com filtering/sorting
@@ -40,7 +40,7 @@ API REST profissional que demonstra implementação completa de conceitos de Eng
 - **Segurança:** Autenticação, rate limiting, validação de dados
 - **Monitoramento:** Logs estruturados e tratamento de erros
 
-## 🏗️ Arquitetura
+## Arquitetura
 
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
@@ -64,7 +64,7 @@ API REST profissional que demonstra implementação completa de conceitos de Eng
 - **Status Codes:** Códigos HTTP apropriados
 - **Content Negotiation:** JSON como formato padrão
 
-## ⚙️ Configuração
+## Configuração
 
 ### Pré-requisitos
 - Node.js 18+
@@ -87,7 +87,7 @@ cp env.example .env
 
 3. **Configure o arquivo `.env`:**
 
-#### **🔧 Configuração Completa (.env)**
+#### **Configuração Completa (.env)**
 ```env
 # =================================================================
 # CONFIGURAÇÃO DA API - VARIÁVEIS DE AMBIENTE
@@ -148,7 +148,7 @@ API_VERSION=1.0.0
 SWAGGER_DESCRIPTION=API REST para gerenciamento de pesquisas acadêmicas e cadastro de clientes
 ```
 
-### **🌍 Configuração por Ambiente**
+### **Configuração por Ambiente**
 
 #### **Local Development:**
 ```env
@@ -181,13 +181,13 @@ npm test
 npm run test:coverage
 ```
 
-### **🔗 URLs da API**
+### **URLs da API**
 
 - **Local:** http://localhost:3000
 - **Produção:** https://projetotccapi.onrender.com
 - **Documentação:** `/api/v1/docs`
 
-### **🚀 Deploy no Render**
+### **Deploy no Render**
 
 #### **Configuração Automática:**
 1. A API detecta automaticamente o ambiente Render
@@ -205,11 +205,11 @@ RATE_LIMIT_WINDOW_MINUTES=15
 ```
 
 #### **Detecção de Ambiente:**
-- ✅ **Render:** Detectado via `process.env.RENDER`
-- ✅ **Produção:** URLs ajustadas para `https://projetotccapi.onrender.com`
-- ✅ **Local:** URLs mantidas como `http://localhost:3000`
+- **Render:** Detectado via `process.env.RENDER`
+- **Produção:** URLs ajustadas para `https://projetotccapi.onrender.com`
+- **Local:** URLs mantidas como `http://localhost:3000`
 
-## 🔐 Autenticação
+## Autenticação
 
 **Tipo:** API Key Authentication
 **Header:** `x-api-key` ou `authorization`
@@ -222,16 +222,16 @@ RATE_LIMIT_WINDOW_MINUTES=15
 - **Janela:** 15 minutos
 - **Headers:** `X-RateLimit-*` incluídos nas respostas
 
-## 📡 Endpoints
+## Endpoints
 
-### 🏠 Sistema
+### Sistema
 | Método | Endpoint | Descrição | Auth |
 |--------|----------|-----------|------|
 | `GET` | `/` | Informações da API | ❌ |
 | `GET` | `/api/v1/test` | Teste da API | ✅ |
 | `GET` | `/api/v1/docs` | Documentação Swagger | ❌ |
 
-### 📊 Pesquisas
+### Pesquisas
 | Método | Endpoint | Descrição | Auth |
 |--------|----------|-----------|------|
 | `GET` | `/api/v1/pesquisas` | Listar pesquisas | ✅ |
@@ -242,7 +242,7 @@ RATE_LIMIT_WINDOW_MINUTES=15
 - `limit`: Limite de resultados (1-100)
 - `offset`: Paginação
 
-### 👥 Clientes
+### Clientes
 | Método | Endpoint | Descrição | Auth |
 |--------|----------|-----------|------|
 | `GET` | `/api/v1/clientes/:cpf` | Consultar cliente | ✅ |
@@ -250,7 +250,7 @@ RATE_LIMIT_WINDOW_MINUTES=15
 | `PUT` | `/api/v1/clientes/:cpf` | Atualizar cliente | ✅ |
 | `DELETE` | `/api/v1/clientes/:cpf` | Deletar cliente | ✅ |
 
-## 🔧 Processamento de Texto
+## Processamento de Texto
 
 ### Quebras de Linha Automáticas
 A API processa automaticamente quebras de linha literais em textos:
@@ -284,18 +284,18 @@ A API retorna dados com 6 campos individuais:
 }
 ```
 
-## 📚 Documentação
+## Documentação
 
 **Swagger UI:** http://localhost:3000/api/v1/docs
 
 A documentação interativa:
-- ✅ Especificação OpenAPI 3.0 completa
-- ✅ Teste interativo de endpoints
-- ✅ Schemas de dados
-- ✅ Exemplos de requests/responses
-- ✅ Configuração de autenticação
+- Especificação OpenAPI 3.0 completa
+- Teste interativo de endpoints
+- Schemas de dados
+- Exemplos de requests/responses
+- Configuração de autenticação
 
-## 🧪 Testes
+## Testes
 
 ### Execução
 ```bash
@@ -314,14 +314,14 @@ npm run test:coverage
 - **Formatos:** HTML, LCOV, Text
 
 ### Testes Implementados
-- ✅ Autenticação por API Key
-- ✅ Validação de endpoints
-- ✅ Estrutura de responses
-- ✅ Códigos de status HTTP
-- ✅ Tratamento de erros
-- ✅ Headers de requisição
+- Autenticação por API Key
+- Validação de endpoints
+- Estrutura de responses
+- Códigos de status HTTP
+- Tratamento de erros
+- Headers de requisição
 
-## 💡 Exemplos de Uso
+## Exemplos de Uso
 
 ### 1. Consultar Cliente
 ```bash
@@ -344,7 +344,7 @@ curl -H "x-api-key: env.API_KEY" \
      "http://localhost:3000/api/v1/pesquisas?limit=10&offset=0&sort=id&order=asc"
 ```
 
-## 🗄️ Estrutura do Banco de Dados
+## Estrutura do Banco de Dados
 
 ### Banco 1: Pesquisas (`bd_projeto_tcc`)
 ```sql
@@ -370,16 +370,16 @@ CREATE TABLE cadastro_clientes (
 );
 ```
 
-## 🔒 Segurança
+## Segurança
 
 ### Medidas Implementadas
-- ✅ **API Key Authentication**
-- ✅ **Rate Limiting** (100 req/15min)
-- ✅ **CORS** configurado
-- ✅ **SQL Injection Prevention** (Prepared Statements)
-- ✅ **Environment Variables** para credenciais
-- ✅ **Input Validation**
-- ✅ **Error Handling** sem exposição de dados sensíveis
+- **API Key Authentication**
+- **Rate Limiting** (100 req/15min)
+- **CORS** configurado
+- **SQL Injection Prevention** (Prepared Statements)
+- **Environment Variables** para credenciais
+- **Input Validation**
+- **Error Handling** sem exposição de dados sensíveis
 
 ### Headers de Segurança
 ```javascript
@@ -389,7 +389,7 @@ X-RateLimit-Limit: 100
 X-RateLimit-Remaining: 99
 ```
 
-## 🛠️ Tecnologias
+## Tecnologias
 
 ### Backend
 - **Node.js** - Runtime JavaScript
@@ -412,22 +412,22 @@ X-RateLimit-Remaining: 99
 - **CORS** - Cross-Origin Resource Sharing
 - **Winston** - Logging estruturado
 
-## 📊 Padrões REST Implementados
+## Padrões REST Implementados
 
-### ✅ Princípios REST
+### Princípios REST
 - **Stateless**: Sem estado entre requisições
 - **Resource-Based**: URLs representam recursos
 - **HTTP Methods**: Uso de GET, POST, PUT, DELETE
 - **Status Codes**: Códigos HTTP apropriados
 - **HATEOAS**: Links relacionados nas responses
 
-### ✅ Convenções
+### Convenções
 - **Versionamento**: `/api/v1/`
 - **Pluralização**: `/clientes`, `/pesquisas`
 - **Hierarquia**: `/api/v1/clientes/:cpf`
 - **Query Parameters**: Para filtering/sorting
 
-### ✅ Response Structure
+### Response Structure
 ```json
 {
   "success": true,
@@ -438,37 +438,37 @@ X-RateLimit-Remaining: 99
 }
 ```
 
-## 🔧 **Melhorias de Configuração Implementadas**
+## **Melhorias de Configuração Implementadas**
 
-### **✅ Variáveis de Ambiente Robustas:**
+### **Variáveis de Ambiente Robustas:**
 - **Auto-detecção** de ambiente (development/production)
 - **URLs dinâmicas** baseadas no ambiente
 - **Rate limiting configurável**
 - **CORS configurável**
 - **Configuração Swagger parametrizada**
 
-### **✅ Compatibilidade Multi-Ambiente:**
+### **Compatibilidade Multi-Ambiente:**
 - **Local:** `http://localhost:3000`
 - **Render:** `https://projetotccapi.onrender.com`
 - **Auto-switch** baseado em `NODE_ENV` e `process.env.RENDER`
 
-### **✅ Configuração Segura:**
+### **Configuração Segura:**
 - Todas as credenciais em variáveis de ambiente
 - Fallbacks seguros para valores padrão
 - Documentação completa de configuração
 - Exemplo `.env` atualizado e organizado
 
-### **✅ Logs Melhorados:**
+### **Logs Melhorados:**
 ```bash
-🚀 API rodando em https://projetotccapi.onrender.com
-📝 Versão: 1.0.0 - Ambiente: production
-📚 Documentação: https://projetotccapi.onrender.com/api/v1/docs
-🔒 Rate Limit: 100 requests/15 min
+API rodando em https://projetotccapi.onrender.com
+Versão: 1.0.0 - Ambiente: production
+Documentação: https://projetotccapi.onrender.com/api/v1/docs
+Rate Limit: 100 requests/15 min
 ```
 
 ---
 ```bash
-🚀 Link documentação API rodando em produção: https://projetotccapi.onrender.com/api/v1/docs/#/Sistema/get_
-🚀 Link documentação API rodando em Localmente: http://localhost:3000/api/v1/docs/#/
+Link documentação API rodando em produção: https://projetotccapi.onrender.com/api/v1/docs/#/Sistema/get_
+Link documentação API rodando em Localmente: http://localhost:3000/api/v1/docs/#/
 
 ```

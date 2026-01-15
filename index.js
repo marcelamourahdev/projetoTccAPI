@@ -257,11 +257,9 @@ Promise.all([
 const processTextLineBreaks = (text) => {
     if (!text || typeof text !== 'string') return text;
     
-    // Primeiro converte \\n (barra dupla + n) em quebra de linha real
-    // Depois converte \n (barra simples + n) em quebra de linha real
     return text
-        .replace(/\\\\n/g, '\n')  // \\n -> quebra de linha real
-        .replace(/\\n/g, '\n');   // \n -> quebra de linha real
+        .replace(/\\\\n/g, '\n')  
+        .replace(/\\n/g, '\n');   
 };
 
 /**
@@ -274,7 +272,6 @@ const processObjectLineBreaks = (obj) => {
     
     const processed = { ...obj };
     
-    // Processa cada propriedade do objeto
     for (const key in processed) {
         if (typeof processed[key] === 'string') {
             processed[key] = processTextLineBreaks(processed[key]);
@@ -489,7 +486,6 @@ app.get('/api/v1/pesquisas', authenticateApiKey, async (req, res) => {
         const countResult = await clientPesquisas.query('SELECT COUNT(*) FROM bd_pesquisa');
         const total = parseInt(countResult.rows[0].count);
         
-        // Processa os textos para converter quebras de linha literais em reais
         const processedData = result.rows.map(row => processObjectLineBreaks(row));
         
         res.json({
@@ -591,7 +587,6 @@ app.get('/api/v1/clientes/:cpf', authenticateApiKey, async (req, res) => {
             });
         }
         
-        // Processa os textos para converter quebras de linha literais em reais
         const processedClient = processObjectLineBreaks(result.rows[0]);
         
         res.json({
@@ -713,7 +708,6 @@ app.post('/api/v1/clientes', authenticateApiKey, async (req, res) => {
             [nome, cpf, telefone, estado]
         );
         
-        // Processa os textos para converter quebras de linha literais em reais
         const processedNewClient = processObjectLineBreaks(result.rows[0]);
         
         res.status(201).json({
@@ -861,7 +855,6 @@ app.put('/api/v1/clientes/:cpf', authenticateApiKey, async (req, res) => {
             values
         );
         
-        // Processa os textos para converter quebras de linha literais em reais
         const processedUpdatedClient = processObjectLineBreaks(result.rows[0]);
         
         res.json({
